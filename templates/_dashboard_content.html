@@ -1,0 +1,76 @@
+{% if profesor_seleccionado %}
+<!-- Calendario Semanal -->
+<div class="card mb-4" style="max-width:98vw; margin-left:auto; margin-right:auto; padding-left:2vw; padding-right:2vw;">
+    <div class="card-header bg-light d-flex align-items-center justify-content-between">
+        <b>🗓️ Calendario Semanal</b>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            {% set dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] %}
+            {% for dia in dias %}
+            <div class="col-md-2 col-lg-2 col-xl-2 col-12 mb-3" style="flex: 1 1 0; max-width: 20%;">
+                <div class="border rounded p-2 bg-light h-100">
+                    <div class="fw-bold mb-2">{{ dia }}</div>
+                    {% for reg in registros if reg['Día']|lower == dia|lower and reg['Semana']|lower == request.args.get('semana', 'par') %}
+                        <div class="mb-2 p-2 bg-white border rounded shadow-sm">
+                            <div><b>{{ reg['Hora'] }}</b></div>
+                            <div>{{ reg['Nombres'] }} {{ reg['Apellidos'] }}</div>
+                            <div class="text-muted small">{{ reg['Grado'] }} {{ reg['Subgrado'] }}</div>
+                        </div>
+                    {% else %}
+                        <div class="text-muted small">-</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<!-- Tabla de registros -->
+<div class="card mb-4" style="max-width:98vw; margin-left:auto; margin-right:auto; padding-left:2vw; padding-right:2vw;">
+    <div class="card-header bg-light">
+        <b>📋 Todos los Registros</b>
+    </div>
+    <div class="card-body">
+        <input type="text" class="form-control mb-3" placeholder="Buscar por nombre, taller, profesor...">
+        {% if registros %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Taller</th>
+                        <th>Día</th>
+                        <th>Hora</th>
+                        <th>Semana</th>
+                        <th>Nivel</th>
+                        <th>Grado</th>
+                        <th>Subgrado</th>
+                        <th>Curso</th>
+                        <th>Nombres</th>
+                        <th>Apellidos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reg in registros %}
+                    <tr>
+                        <td>{{ reg['Taller'] }}</td>
+                        <td>{{ reg['Día'] }}</td>
+                        <td>{{ reg['Hora'] }}</td>
+                        <td>{{ reg['Semana'] }}</td>
+                        <td>{{ reg['Nivel'] }}</td>
+                        <td>{{ reg['Grado'] }}</td>
+                        <td>{{ reg['Subgrado'] }}</td>
+                        <td>{{ reg['Curso'] }}</td>
+                        <td>{{ reg['Nombres'] }}</td>
+                        <td>{{ reg['Apellidos'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <span class="text-muted">No hay inscripciones registradas</span>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

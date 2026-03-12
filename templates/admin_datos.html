@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filter Activities</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+                .day-btn {
+                    margin: 0 8px 8px 0;
+                    font-size: 1.08rem;
+                    font-weight: 500;
+                    border-radius: 0.7rem;
+                    padding: 0.6rem 1.4rem;
+                    letter-spacing: 0.5px;
+                    transition: all 0.2s;
+                    background: #fff;
+                    border: 1.5px solid #e0e7ff;
+                    color: #111 !important;
+                    display: inline-flex;
+                    align-items: center;
+                    text-decoration: none !important;
+                    text-transform: uppercase;
+                }
+                .day-btn.active, .day-btn:active, .day-btn:focus {
+                    background: #2563eb;
+                    color: #fff !important;
+                    border-color: #2563eb;
+                    box-shadow: 0 2px 8px #2563eb22;
+                    text-decoration: none !important;
+                }
+                .day-btn:hover {
+                    background: #e0e7ff;
+                    color: #2563eb !important;
+                    text-decoration: none !important;
+                }
+        body { background: #f4f6fa; }
+        .filter-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px #0001;
+            padding: 32px 2vw 24px 2vw;
+            margin-bottom: 32px;
+            max-width: 98vw;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .filter-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        .filter-section {
+            margin-bottom: 18px;
+        }
+        .filter-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .prof-btn, .level-btn, .semana-btn {
+            margin: 0 8px 8px 0;
+            font-size: 1.08rem;
+            font-weight: 500;
+            border-radius: 0.7rem;
+            padding: 0.6rem 1.4rem;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            background: #fff;
+            border: 1.5px solid #e0e7ff;
+            color: #111 !important;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none !important;
+            text-transform: uppercase;
+        }
+        .prof-btn.active, .prof-btn:active, .prof-btn:focus,
+        .level-btn.active, .level-btn:active, .level-btn:focus,
+        .semana-btn.active, .semana-btn:active, .semana-btn:focus {
+            background: #2563eb;
+            color: #fff !important;
+            border-color: #2563eb;
+            box-shadow: 0 2px 8px #2563eb22;
+            text-decoration: none !important;
+        }
+        .prof-btn:hover, .level-btn:hover, .semana-btn:hover {
+            background: #e0e7ff;
+            color: #2563eb !important;
+            text-decoration: none !important;
+        }
+        .level-btn .bi, .level-btn .emoji {
+            margin-right: 0.5em;
+            font-size: 1.2em;
+        }
+        .divider {
+            border-bottom: 1px solid #e5e9f2;
+            margin: 18px 0 18px 0;
+        }
+    </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function getParams() {
+            return {
+                profesor: document.querySelector('.prof-btn.active')?.textContent.trim() || '',
+                semana: document.querySelector('.semana-btn.active')?.dataset.semana || 'par',
+                nivel: document.querySelector('.level-btn.active')?.dataset.nivel || 'All',
+                dia: document.querySelector('.day-btn.active')?.dataset.dia || 'All'
+            };
+        }
+
+        function updateDashboard(params) {
+            const query = new URLSearchParams(params).toString();
+            fetch('/dashboard_content?' + query)
+                .then(r => r.text())
+                .then(html => {
+                    document.getElementById('dashboard-content').innerHTML = html;
+                });
+        }
+
+        document.body.addEventListener('click', function(e) {
+            const btn = e.target.closest('.prof-btn, .level-btn, .semana-btn, .day-btn');
+            if (btn) {
+                e.preventDefault();
+                if (btn.classList.contains('prof-btn')) {
+                    document.querySelectorAll('.prof-btn').forEach(b => b.classList.remove('active'));
+                }
+                if (btn.classList.contains('semana-btn')) {
+                    document.querySelectorAll('.semana-btn').forEach(b => b.classList.remove('active'));
+                }
+                if (btn.classList.contains('level-btn')) {
+                    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                }
+                if (btn.classList.contains('day-btn')) {
+                    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+                }
+                btn.classList.add('active');
+                updateDashboard(getParams());
+            }
+        });
+    });
+    </script>
+</head>
+<body>
+<div class="container mt-4">
+    <div style="margin-bottom: 18px;">
+        <h2 style="font-weight: 700; font-size: 2.1rem; margin-bottom: 0.2em; display: flex; align-items: center; gap: 0.5em;">
+            <span>🎵</span> Talleres Musicales
+        </h2>
+        <div style="color: #6c757d; font-size: 1.1rem; margin-left: 2.2em;">Talleres Musicales</div>
+    </div>
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+        {{ error|safe }}
+    </div>
+    {% endif %}
+    <div class="filter-card">
+        <div class="filter-title">Filter Activities</div>
+        <div class="filter-section">
+            <div class="filter-label">Professor</div>
+            {% if profesores %}
+                {% for prof in profesores %}
+                    <a href="#" class="prof-btn{% if profesor_seleccionado and prof|lower == profesor_seleccionado|lower %} active{% endif %}">{{ prof }}</a>
+                {% endfor %}
+            {% else %}
+                <span class="text-muted">No hay profesores registrados aún</span>
+            {% endif %}
+        </div>
+        <div class="divider"></div>
+        <div class="filter-section">
+            <div class="filter-label">Level</div>
+            <a href="#" class="level-btn{% if request.args.get('nivel', 'All') == 'All' %} active{% endif %}" data-nivel="All">All</a>
+            <a href="#" class="level-btn{% if request.args.get('nivel', 'All') == 'Junior' %} active{% endif %}" data-nivel="Junior"><span class="emoji">🎒</span>Junior</a>
+            <a href="#" class="level-btn{% if request.args.get('nivel') == 'Secondary' %} active{% endif %}" data-nivel="Secondary"><span class="emoji">🎓</span>Secondary</a>
+        </div>
+        <div class="divider"></div>
+        <div class="filter-section">
+            <div class="filter-label">Semana</div>
+            <a href="#" class="semana-btn{% if request.args.get('semana', 'par') == 'par' %} active{% endif %}" data-semana="par">Semana Par</a>
+            <a href="#" class="semana-btn{% if request.args.get('semana') == 'impar' %} active{% endif %}" data-semana="impar">Semana Impar</a>
+        </div>
+        <div class="divider"></div>
+        <div class="filter-section">
+            <div class="filter-label">Day</div>
+            <a href="#" class="day-btn{% if not request.args.get('dia') or request.args.get('dia') == 'All' %} active{% endif %}" data-dia="All">All</a>
+            <a href="#" class="day-btn{% if request.args.get('dia') == 'Lunes' %} active{% endif %}" data-dia="Lunes">Lunes</a>
+            <a href="#" class="day-btn{% if request.args.get('dia') == 'Martes' %} active{% endif %}" data-dia="Martes">Martes</a>
+            <a href="#" class="day-btn{% if request.args.get('dia') == 'Miércoles' %} active{% endif %}" data-dia="Miércoles">Miércoles</a>
+            <a href="#" class="day-btn{% if request.args.get('dia') == 'Jueves' %} active{% endif %}" data-dia="Jueves">Jueves</a>
+            <a href="#" class="day-btn{% if request.args.get('dia') == 'Viernes' %} active{% endif %}" data-dia="Viernes">Viernes</a>
+        </div>
+        </div>
+    </div>
+    <div class="mb-4">
+        {# Botón de descargar Excel eliminado #}
+    </div>
+    <div class="card mb-4" style="max-width: 98vw; margin-left: auto; margin-right: auto; padding-left: 2vw; padding-right: 2vw;">
+        <div id="dashboard-content">
+            {% include '_dashboard_content.html' %}
+        </div>
+    </div>
+    </div>
+    <div class="card mb-4">
+        {% if profesor_seleccionado %}
+        <div class="card-header bg-light">
+            <b>📋 Todos los Registros</b>
+        </div>
+        <div class="card-body">
+            <input type="text" class="form-control mb-3" placeholder="Buscar por nombre, taller, profesor...">
+            {% if registros %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Taller</th>
+                            <th>Día</th>
+                            <th>Hora</th>
+                            <th>Semana</th>
+                            <th>Nivel</th>
+                            <th>Grado</th>
+                            <th>Subgrado</th>
+                            <th>Curso</th>
+                            <th>Nombres</th>
+                            <th>Apellidos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reg in registros %}
+                        <tr>
+                            <td>{{ reg['Taller'] }}</td>
+                            <td>{{ reg['Día'] }}</td>
+                            <td>{{ reg['Hora'] }}</td>
+                            <td>{{ reg['Semana'] }}</td>
+                            <td>{{ reg['Nivel'] }}</td>
+                            <td>{{ reg['Grado'] }}</td>
+                            <td>{{ reg['Subgrado'] }}</td>
+                            <td>{{ reg['Curso'] }}</td>
+                            <td>{{ reg['Nombres'] }}</td>
+                            <td>{{ reg['Apellidos'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <span class="text-muted">No hay inscripciones registradas</span>
+            {% endif %}
+        </div>
+        {% endif %}
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
